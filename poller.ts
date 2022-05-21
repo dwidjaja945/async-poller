@@ -1,6 +1,6 @@
 import axios from "axios";
 
-type Callback<T> = (resp: T) => any;
+type Callback<T> = (resp: T) => any | Promise<any>;
 
 export default class Poller<T> {
 	private api: string;

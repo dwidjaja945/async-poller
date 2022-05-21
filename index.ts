@@ -1,8 +1,8 @@
 import axios from "axios";
 import Poller from "./poller";
 
-const START_DATE = "5/17/2022";
-const END_DATE = "5/20/2022";
+const START_DATE = new Date().toDateString();
+const END_DATE = new Date("5/25/2022").toDateString();
 
 const today = new Date();
 
@@ -29,8 +29,30 @@ class Main<T> {
 		await this.poller.genPoll();
 	}
 
-	private genHandleAvailabilities(dates) {
-		console.log({ dates });
+	private async genAvailableDates(data) {
+		const availabilities = data["calendar-availabilities"];
+		const filteredDates = availabilities.filter((day) => {
+			const { date } = day;
+			const calendarDate = new Date(replaceHyphensWithDash(date));
+			return (
+				calendarDate > new Date(this.startDate) &&
+				calendarDate <= new Date(this.endDate)
+			);
+		});
+
+		return filteredDates
+			.filter((day) => {
+				const { facilities } = day;
+				return facilities.some((fac) => {
+					return fac.available;
+				});
+			})
+			.map(({ date }) => date);
+	}
+
+	private async genHandleAvailabilities(data) {
+		const availableDates = await this.genAvailableDates(data);
+		console.log({ availableDates });
 	}
 
 	private getHasAvailabilities(data): boolean {
