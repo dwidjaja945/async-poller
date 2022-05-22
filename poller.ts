@@ -10,7 +10,7 @@ export default class Poller<T> {
 	private checkForTargetData: (...args: any) => boolean | Promise<boolean>;
 	private callback: Callback<T>;
 
-	private MAX_INTERVAL = 1000;
+	private MAX_INTERVAL = 10;
 
 	constructor(
 		api: string,

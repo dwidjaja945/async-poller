@@ -39,11 +39,11 @@ exports.__esModule = true;
 var axios_1 = require("axios");
 var poller_1 = require("./poller");
 var START_DATE = new Date().toDateString();
-var END_DATE = new Date("5/25/2022").toDateString();
+var END_DATE = new Date("5/26/2022").toDateString();
 var today = new Date();
 var Main = /** @class */ (function () {
     function Main(startDate, endDate) {
-        this.API_ROUTE = "https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3";
+        this.API_ROUTE = "https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12";
         this.startDate = startDate !== null && startDate !== void 0 ? startDate : new Date().toString();
         this.endDate =
             endDate !== null && endDate !== void 0 ? endDate : new Date(today.setDate(today.getDate() + 5)).toString(); // defaults to 5 days from today
@@ -72,7 +72,7 @@ var Main = /** @class */ (function () {
                 filteredDates = availabilities.filter(function (day) {
                     var date = day.date;
                     var calendarDate = new Date(replaceHyphensWithDash(date));
-                    return (calendarDate > new Date(_this.startDate) &&
+                    return (calendarDate >= new Date(_this.startDate) &&
                         calendarDate <= new Date(_this.endDate));
                 });
                 return [2 /*return*/, filteredDates
@@ -97,6 +97,7 @@ var Main = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.genAvailableDates(data)];
                     case 1:
                         availableDates = _a.sent();
+                        console.log("\n      There are available dates: ".concat(availableDates, "\n      Link: https://disneyland.disney.go.com/entry-reservation/add/select-date/\n    "));
                         console.log({ availableDates: availableDates });
                         return [2 /*return*/];
                 }
@@ -126,7 +127,7 @@ function genCalendarAvailabilities() {
         var data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, axios_1["default"].get("https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3")];
+                case 0: return [4 /*yield*/, axios_1["default"].get("https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12")];
                 case 1:
                     data = (_a.sent()).data;
                     return [2 /*return*/, data];
@@ -138,7 +139,7 @@ new Main(START_DATE, END_DATE);
 // new Main<any>("6/1/2022", "6/12/2022");
 // async function genCalendarAvailabilities() {
 // 	const resp = await fetch(
-// 		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3",
+// 		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12",
 // 		{
 // 			headers: {
 // 				"Content-Type": "application/json",
@@ -177,7 +178,7 @@ function findAvailabilitiesWithinDates(date1, date2) {
                     filteredDates = calendarAvailabilities.filter(function (_a) {
                         var _date = _a.date;
                         var date = new Date(replaceHyphensWithDash(_date));
-                        return date > startDate && date < endDate;
+                        return date >= startDate && date <= endDate;
                     });
                     return [4 /*yield*/, findAvailabilitiesImpl(filteredDates)];
                 case 2: return [2 /*return*/, _a.sent()];
@@ -242,11 +243,13 @@ function process(targetDate) {
     });
 }
 // process("2022-05-13");
-findAvailabilitiesWithinDates(START_DATE, END_DATE).then(function (resp) {
-    if (resp.length) {
-        console.log("availabilities between ".concat(START_DATE, " and ").concat(END_DATE));
-        console.log(resp);
-        return;
-    }
-    console.log("There are no availabilities between ".concat(START_DATE, " and ").concat(END_DATE));
-});
+// findAvailabilitiesWithinDates(START_DATE, END_DATE).then((resp) => {
+// 	if (resp.length) {
+// 		console.log(`availabilities between ${START_DATE} and ${END_DATE}`);
+// 		console.log(resp);
+// 		return;
+// 	}
+// 	console.log(
+// 		`There are no availabilities between ${START_DATE} and ${END_DATE}`,
+// 	);
+// });

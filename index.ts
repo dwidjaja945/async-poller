@@ -2,7 +2,7 @@ import axios from "axios";
 import Poller from "./poller";
 
 const START_DATE = new Date().toDateString();
-const END_DATE = new Date("5/25/2022").toDateString();
+const END_DATE = new Date("5/26/2022").toDateString();
 
 const today = new Date();
 
@@ -11,7 +11,7 @@ class Main<T> {
 	private startDate: string;
 	private endDate: string;
 	private API_ROUTE =
-		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3";
+		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12";
 
 	constructor(startDate?: string, endDate?: string) {
 		this.startDate = startDate ?? new Date().toString();
@@ -35,7 +35,7 @@ class Main<T> {
 			const { date } = day;
 			const calendarDate = new Date(replaceHyphensWithDash(date));
 			return (
-				calendarDate > new Date(this.startDate) &&
+				calendarDate >= new Date(this.startDate) &&
 				calendarDate <= new Date(this.endDate)
 			);
 		});
@@ -52,6 +52,10 @@ class Main<T> {
 
 	private async genHandleAvailabilities(data) {
 		const availableDates = await this.genAvailableDates(data);
+		console.log(`
+      There are available dates: ${availableDates}
+      Link: https://disneyland.disney.go.com/entry-reservation/add/select-date/
+    `);
 		console.log({ availableDates });
 	}
 
@@ -77,7 +81,7 @@ class Main<T> {
 
 async function genCalendarAvailabilities() {
 	const { data } = await axios.get(
-		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3",
+		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12",
 	);
 	return data;
 }
@@ -87,7 +91,7 @@ new Main<any>(START_DATE, END_DATE);
 
 // async function genCalendarAvailabilities() {
 // 	const resp = await fetch(
-// 		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=3",
+// 		"https://disneyland.disney.go.com/passes/blockout-dates/api/get-availability/?product-types=enchant-key-pass&destinationId=DLR&numMonths=12",
 // 		{
 // 			headers: {
 // 				"Content-Type": "application/json",
@@ -119,7 +123,7 @@ async function findAvailabilitiesWithinDates(date1, date2) {
 	const filteredDates = calendarAvailabilities.filter(({ date: _date }) => {
 		const date = new Date(replaceHyphensWithDash(_date));
 
-		return date > startDate && date < endDate;
+		return date >= startDate && date <= endDate;
 	});
 
 	return await findAvailabilitiesImpl(filteredDates);
@@ -159,13 +163,13 @@ async function process(targetDate) {
 	}, 2000);
 }
 // process("2022-05-13");
-findAvailabilitiesWithinDates(START_DATE, END_DATE).then((resp) => {
-	if (resp.length) {
-		console.log(`availabilities between ${START_DATE} and ${END_DATE}`);
-		console.log(resp);
-		return;
-	}
-	console.log(
-		`There are no availabilities between ${START_DATE} and ${END_DATE}`,
-	);
-});
+// findAvailabilitiesWithinDates(START_DATE, END_DATE).then((resp) => {
+// 	if (resp.length) {
+// 		console.log(`availabilities between ${START_DATE} and ${END_DATE}`);
+// 		console.log(resp);
+// 		return;
+// 	}
+// 	console.log(
+// 		`There are no availabilities between ${START_DATE} and ${END_DATE}`,
+// 	);
+// });
